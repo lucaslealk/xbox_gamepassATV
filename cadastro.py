@@ -1,14 +1,16 @@
 import customtkinter
 import tkinter as tk
-import main
-import defs
+import main 
+import defs 
+import conexao
+
 
 def cadastrar_usuario(email, senha, nome, janela_cadastro):
-    if not main.validar_email(email):
+    if not defs.validar_email(email):
         defs.mostrar_erro("E-mail inválido!")
         return
 
-    if main.colecao.find_one({"email": email}):
+    if conexao.colecao.find_one({"email": email}):
         defs.mostrar_erro("E-mail já cadastrado!")
         return
     
@@ -19,7 +21,7 @@ def cadastrar_usuario(email, senha, nome, janela_cadastro):
             "senha": senha
         }
         
-        main.colecao.insert_one(usuario)
+        conexao.colecao.insert_one(usuario)
         
         # Primeiro destrua todas as janelas intermediárias
         for widget in main.janela.winfo_children():
@@ -203,7 +205,7 @@ def verificar_email_cadastro(email, janela_cadastro):
         defs.mostrar_erro("Email inválido")
         return
     
-    usuario = defs.colecao.find_one({"email": email})
+    usuario = conexao.colecao.find_one({"email": email})
     if usuario:
         defs.mostrar_erro("Email já cadastrado")
         return

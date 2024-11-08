@@ -1,7 +1,9 @@
-import cadastro
 import customtkinter
 import tkinter as tk
 import defs
+import cadastro
+import conexao
+
 
 
 # Configurações iniciais
@@ -165,7 +167,7 @@ def abrir_janela_principal(nome_usuario):
 # Mantendo o resto das suas funções originais
 def verificar_senha(email_text, janela_senha):
     senha_text = campo_senha.get()
-    usuario = cadastro.colecao.find_one({"email": email_text, "senha": senha_text})
+    usuario = conexao.colecao.find_one({"email": email_text, "senha": senha_text})
     if usuario:
         janela_senha.destroy()
         abrir_janela_principal(usuario["nome"])
@@ -270,7 +272,7 @@ def verificar_email():
         defs.mostrar_erro_temporario("Email inválido")
         return
     
-    usuario = defs.colecao.find_one({"email": email_text})
+    usuario = conexao.colecao.find_one({"email": email_text})
     if usuario:
         abrir_tela_senha(email_text)
     else:
@@ -370,5 +372,39 @@ erro_label = customtkinter.CTkLabel(
     font=("Segoe UI", 12)
 )
 erro_label.pack(pady=(10, 0))
+
+def mostrar_erro(mensagem):
+    alerta = customtkinter.CTkToplevel()
+    alerta.title("Erro")
+    alerta.geometry("300x150")
+    defs.centralizar_janela(alerta, 300, 150)
+    alerta.grab_set()
+    mensagem_erro = customtkinter.CTkLabel(alerta, text=mensagem)
+    mensagem_erro.pack(pady=20)
+    
+    def fechar_e_mostrar_login():
+        alerta.destroy()
+        janela.deiconify()
+
+def limpar_erro():
+    """Limpa a mensagem de erro e reseta o timer"""
+    global erro_timer
+    erro_label.configure(text="")
+    erro_timer = None
+
+def mostrar_erro_temporario(mensagem):
+    """Exibe uma mensagem de erro que desaparece após 5 segundos"""
+    global erro_timer
+    
+    # Se já existe um timer ativo, cancela ele
+    if erro_timer is not None:
+        janela.after_cancel(erro_timer)
+        erro_timer = None
+    
+    # Exibe a nova mensagem de erro
+    erro_label.configure(text=mensagem)
+    
+    # Agenda a limpeza da mensagem para daqui 5 segundos (5000 milissegundos)
+    erro_timer = janela.after(5000, limpar_erro)
 
 janela.mainloop()
